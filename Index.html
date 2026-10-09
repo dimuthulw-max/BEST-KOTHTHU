@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best Koththu - The Ultimate Sizzling Koththu Spot</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#f97316',
+                            red: '#dc2626',
+                            yellow: '#f59e0b',
+                            dark: '#0f172a',
+                            card: '#1e293b'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&family=Poppins:wght@600;800;900&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- GSAP for Smooth Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Alpine.js CDN for reactivity -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Custom CSS Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .heading-font {
+            font-family: 'Poppins', sans-serif;
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #fb923c 0%, #ef4444 50%, #eab308 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-button {
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+            transition: all 0.3s ease;
+        }
+        .glow-button:hover {
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.7);
+            transform: translateY(-2px);
+        }
+        .pulse-fire {
+            animation: firePulse 2s infinite alternate;
+        }
+        @keyframes firePulse {
+            0% { filter: drop-shadow(0 0 5px rgba(249, 115, 22, 0.6)); }
+            100% { filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.9)); }
+        }
+    </style>
+</head>
+<body x-data="koththuApp()" x-init="initApp()" class="antialiased selection:bg-orange-500 selection:text-white">
+
+    <script>
+        const AudioFX = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playTaka() {
+                this.init();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                
+                const now = this.ctx.currentTime;
+                // Metallic blade click sound
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(120, now + 0.05);
+                
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.05);
+            },
+            playSizzle() {
+                this.init();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                const bufferSize = this.ctx.sampleRate * 0.3;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                const noise = this.ctx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.value = 3000;
+                filter.Q.value = 1.5;
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+
+                noise.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                noise.start();
+            },
+            playKoththuRhythm() {
+                let beats = [0, 80, 160, 240, 400, 480];
+                beats.forEach(delay => {
+                    setTimeout(() => {
+                        this.playTaka();
+                    }, delay);
+                });
+            }
+        };
+    </script>
+
+    <header class="fixed top-0 left-0 w-full z-50 glass-card border-b border-slate-800/80 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-600 to-red-600 flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-fire-burner pulse-fire"></i>
+                </div>
+                <div>
+                    <span class="heading-font text-2xl font-black tracking-wider text-white flex items-center gap-1">
+                        BEST <span class="text-orange-500">KOTHTHU</span>
+                    </span>
+                    <span class="text-[10px] tracking-widest text-orange-400 uppercase font-semibold block -mt-1">
+                        Sizzling Hot • Authentic Street Taste
+                    </span>
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-slate-300">
+                <a href="#hero" class="hover:text-orange-400 transition-colors">Home</a>
+                <a href="#menu" class="hover:text-orange-400 transition-colors">Menu</a>
+                <a href="#builder" class="hover:text-orange-400 transition-colors flex items-center gap-1.5 text-amber-400 font-semibold">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Koththu Builder
+                </a>
+                <a href="#about" class="hover:text-orange-400 transition-colors">Why Us</a>
+                <a href="#contact" class="hover:text-orange-400 transition-colors">Contact</a>
+            </nav>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-3">
+                <!-- Sound Effect Button -->
+                <button @click="AudioFX.playKoththuRhythm()" title="Listen to Koththu Beat!" class="w-10 h-10 rounded-xl bg-slate-800/80 hover:bg-orange-500/20 text-orange-400 border border-slate-700 flex items-center justify-center transition-all hover:scale-105">
+                    <i class="fa-solid fa-drumstick-bite text-sm"></i>
+                </button>
+
+                <!-- Cart Button -->
+                <button @click="cartOpen = true" class="relative px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-orange-600/30 hover:opacity-95 transition">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span class="hidden sm:inline">Cart</span>
+                    <span x-show="cart.length > 0" x-text="cart.reduce((a,b)=>a+b.qty,0)" class="bg-amber-400 text-slate-950 font-black text-xs px-2 py-0.5 rounded-full">0</span>
+                </button>
+
+                <!-- Mobile Menu Toggle -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 flex items-center justify-center">
+                    <i class="fa-solid" :class="mobileMenuOpen ? 'fa-xmark' : 'fa-bars'"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Drawer -->
+        <div x-show="mobileMenuOpen" x-transition class="md:hidden bg-slate-900/95 border-b border-slate-800 px-6 py-4 flex flex-col gap-4 text-center">
+            <a href="#hero" @click="mobileMenuOpen=false" class="py-2 text-slate-200 font-semibold">Home</a>
+            <a href="#menu" @click="mobileMenuOpen=false" class="py-2 text-slate-200 font-semibold">Menu</a>
+            <a href="#builder" @click="mobileMenuOpen=false" class="py-2 text-amber-400 font-bold">Custom Koththu Builder</a>
+            <a href="#about" @click="mobileMenuOpen=false" class="py-2 text-slate-200 font-semibold">Why Best Koththu</a>
+            <a href="#contact" @click="mobileMenuOpen=false" class="py-2 text-slate-200 font-semibold">Location & Contact</a>
+        </div>
+    </header>
+
+    <section id="hero" class="relative pt-32 pb-20 md:pt-44 md:pb-32 overflow-hidden">
+        <!-- Background Glows -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-orange-600/20 to-red-600/20 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Hero Left Content -->
+                <div class="lg:col-span-7 text-center lg:text-left space-y-6">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs sm:text-sm font-semibold">
+                        <span class="flex h-2 w-2 rounded-full bg-orange-500 animate-ping"></span>
+                        🔥 ලංකාවේ සුපිරිම උණු උණු කොත්තු පාර!
+                    </div>
+
+                    <h1 class="heading-font text-4xl sm:text-6xl xl:text-7xl font-black tracking-tight leading-none text-white">
+                        THE HOTTEST <br>
+                        <span class="text-gradient">KOTHTHU</span> EXPERIENCES.
+                    </h1>
+
+                    <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                        චිකන් කොත්තු, මෙල්ටඩ් චීස් කොත්තු, ඩොල්ෆින් කොත්තු, නැත්නම් ඔයාටම ඕනම විදිහට කස්ටම් හදාගන්න කොත්තු! උණු උණු මාරම රස කොත්තු පාරක් දාන්න දැන්ම ඕඩර් කරන්න!
+                    </p>
+
+                    <!-- CTAs -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                        <a href="#menu" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 via-red-600 to-amber-500 text-white font-black text-lg text-center glow-button flex items-center justify-center gap-3">
+                            <i class="fa-solid fa-utensils"></i> View Menu & Order
+                        </a>
+                        <a href="#builder" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-bold text-lg text-center flex items-center justify-center gap-3 transition">
+                            <i class="fa-solid fa-sliders"></i> Make Custom Koththu
+                        </a>
+                    </div>
+
+                    <!-- Quick Trust Indicators -->
+                    <div class="pt-8 border-t border-slate-800/80 grid grid-cols-3 gap-4 text-center lg:text-left">
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-amber-400">100%</div>
+                            <div class="text-xs text-slate-400 font-medium">Fresh Ingredients</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-orange-500">20+</div>
+                            <div class="text-xs text-slate-400 font-medium">Koththu Varieties</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl sm:text-3xl font-black text-red-500">30 Min</div>
+                            <div class="text-xs text-slate-400 font-medium">Fast Hot Delivery</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Right Card / Graphic -->
+                <div class="lg:col-span-5 relative" x-data="{ currentHeroImg: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=1000&q=80', activeTab: 'cheese' }">
+                    <div class="relative mx-auto max-w-md lg:max-w-none">
+                        <!-- Main Image Frame -->
+                        <div class="relative rounded-3xl overflow-hidden border-2 border-orange-500/40 shadow-2xl shadow-orange-950/60 group">
+                            <img :src="currentHeroImg" 
+                                 alt="Sizzling Sri Lankan Koththu Rotti" 
+                                 class="w-full h-[420px] sm:h-[500px] object-cover group-hover:scale-105 transition-all duration-500"
+                                 onerror="this.src='https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=900&q=80'">
+                            
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
+
+                            <!-- Floating Offer Badge -->
+                            <div class="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-orange-600 text-white text-xs font-black px-4 py-2 rounded-xl uppercase shadow-xl tracking-wider rotate-2 border border-amber-400/30">
+                                🔥 Hot Sizzling Koththu
+                            </div>
+
+                            <!-- Interactive Hero Image Selector Pills -->
+                            <div class="absolute top-4 left-4 flex flex-col gap-2 z-10">
+                                <button @click="currentHeroImg = 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=1000&q=80'; activeTab = 'cheese'; AudioFX.playSizzle()"
+                                        :class="activeTab === 'cheese' ? 'bg-orange-500 text-white font-bold border-orange-400' : 'bg-slate-900/80 text-slate-300 border-slate-700 hover:bg-slate-800'"
+                                        class="px-3 py-1.5 rounded-xl text-[11px] backdrop-blur-md border transition flex items-center gap-1.5 shadow-lg">
+                                    <span>🧀 Cheese Lava</span>
+                                </button>
+
+                                <button @click="currentHeroImg = 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=1000&q=80'; activeTab = 'chicken'; AudioFX.playSizzle()"
+                                        :class="activeTab === 'chicken' ? 'bg-orange-500 text-white font-bold border-orange-400' : 'bg-slate-900/80 text-slate-300 border-slate-700 hover:bg-slate-800'"
+                                        class="px-3 py-1.5 rounded-xl text-[11px] backdrop-blur-md border transition flex items-center gap-1.5 shadow-lg">
+                                    <span>🍗 Spicy Chicken</span>
+                                </button>
+
+                                <button @click="currentHeroImg = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=80'; activeTab = 'dolphin'; AudioFX.playSizzle()"
+                                        :class="activeTab === 'dolphin' ? 'bg-orange-500 text-white font-bold border-orange-400' : 'bg-slate-900/80 text-slate-300 border-slate-700 hover:bg-slate-800'"
+                                        class="px-3 py-1.5 rounded-xl text-[11px] backdrop-blur-md border transition flex items-center gap-1.5 shadow-lg">
+                                    <span>🐬 Dolphin Mix</span>
+                                </button>
+                            </div>
+
+                            <!-- Bottom Floating Card -->
+                            <div class="absolute bottom-6 left-6 right-6 p-4 glass-card rounded-2xl flex items-center justify-between border border-orange-500/40 backdrop-blur-md">
+                                <div>
+                                    <div class="text-[11px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1">
+                                        <i class="fa-solid fa-fire text-orange-500"></i> Best Seller Today
+                                    </div>
+                                    <div class="text-base sm:text-lg font-black text-white" x-text="activeTab === 'cheese' ? 'Full Cheese Lava Chicken Koththu' : (activeTab === 'chicken' ? 'Spicy Roast Chicken Koththu' : 'Special Dolphin Parotta Mix')"></div>
+                                    <div class="text-xs text-slate-300">LKR 1,600 • Gravy & Spicy Mix Included</div>
+                                </div>
+                                <button @click="addToCart({id:'spec-1', name:'Special Sizzling Koththu', price:1600, category:'Special'})" class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-orange-500 to-red-600 hover:scale-105 text-white flex items-center justify-center font-bold text-xl shadow-lg transition shrink-0">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="builder" class="py-20 bg-slate-900/60 border-y border-slate-800 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-14">
+                <span class="text-orange-500 font-bold text-sm tracking-widest uppercase">Create Your Own Taste</span>
+                <h2 class="heading-font text-3xl sm:text-5xl font-black text-white mt-2">
+                    ONAMA KOTHTHUWA HADAGANNA <br>
+                    <span class="text-gradient">CUSTOM KOTHTHU BUILDER</span>
+                </h2>
+                <p class="text-slate-400 mt-3 text-sm sm:text-base">
+                    ඔයාට කැමති රොටී වර්ගය, මස්/චීස්, ග්‍රේවි සහ මිරිස් මට්ටම තෝරලා ඔයාගෙන්ම Unique Koththu එක හදාගන්න!
+                </p>
+            </div>
+
+            <!-- Builder Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Options Panel -->
+                <div class="lg:col-span-8 space-y-8">
+                    
+                    <!-- Step 1: Base Type -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 text-xs flex items-center justify-center font-black">1</span>
+                            Choose Base (රොටී වර්ගය)
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <template x-for="base in builderOptions.bases" :key="base.id">
+                                <button @click="customKoththu.base = base; AudioFX.playTaka()" 
+                                        :class="customKoththu.base.id === base.id ? 'border-orange-500 bg-orange-500/20 text-white' : 'border-slate-800 bg-slate-800/50 text-slate-400 hover:border-slate-700'"
+                                        class="p-4 rounded-xl border text-left transition flex flex-col justify-between h-24">
+                                    <span class="font-bold text-sm" x-text="base.name"></span>
+                                    <span class="text-xs text-orange-400 font-semibold" x-text="`LKR ${base.price}`"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Main Meat & Cheese Protein -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 text-xs flex items-center justify-center font-black">2</span>
+                            Select Protein & Meat (මස් / චීස් / බිත්තර)
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <template x-for="protein in builderOptions.proteins" :key="protein.id">
+                                <button @click="customKoththu.protein = protein; AudioFX.playTaka()" 
+                                        :class="customKoththu.protein.id === protein.id ? 'border-orange-500 bg-orange-500/20 text-white' : 'border-slate-800 bg-slate-800/50 text-slate-400 hover:border-slate-700'"
+                                        class="p-4 rounded-xl border text-left transition flex flex-col justify-between h-24">
+                                    <span class="font-bold text-sm" x-text="protein.name"></span>
+                                    <span class="text-xs text-orange-400 font-semibold" x-text="`+ LKR ${protein.price}`"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Gravy / Curry Selection -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-amber-400 mb-4 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 text-xs flex items-center justify-center font-black">3</span>
+                            Curry & Gravy Style (කරිය / ග්‍රේවි)
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <template x-for="gravy in builderOptions.gravies" :key="gravy.id">
+                                <button @click="customKoththu.gravy = gravy; AudioFX.playTaka()" 
+                                        :class="customKoththu.gravy.id === gravy.id ? 'border-orange-500 bg-orange-500/20 text-white' : 'border-slate-800 bg-slate-800/50 text-slate-400 hover:border-slate-700'"
+                                        class="p-3.5 rounded-xl border text-left transition flex flex-col justify-between h-20">
+                                    <span class="font-bold text-xs" x-text="gravy.name"></span>
+                                    <span class="text-[11px] text-amber-400 font-semibold" x-text="gravy.price === 0 ? 'Free' : `+ LKR ${gravy.price}`"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Spice Level Slider -->
+                    <div class="glass-card p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-amber-400 mb-2 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 text-xs flex items-center justify-center font-black">4</span>
+                            Spice Level (සැර ප්‍රමාණය)
+                        </h3>
+                        <div class="grid grid-cols-4 gap-2 pt-2">
+                            <template x-for="spice in ['Mild 🌶️', 'Medium 🌶️🌶️', 'Hot 🔥', 'Nai Miris 💥']" :key="spice">
+                                <button @click="customKoththu.spice = spice; AudioFX.playSizzle()" 
+                                        :class="customKoththu.spice === spice ? 'border-red-500 bg-red-600/30 text-white font-bold' : 'border-slate-800 bg-slate-800/50 text-slate-400'"
+                                        class="py-3 px-2 rounded-xl border text-center text-xs transition">
+                                    <span x-text="spice"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Live Summary Sidecard -->
+                <div class="lg:col-span-4 sticky top-28">
+                    <div class="glass-card p-6 rounded-3xl border border-orange-500/40 space-y-6 shadow-2xl">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                            <h3 class="heading-font text-xl font-bold text-white">Your Custom Mix</h3>
+                            <span class="text-xs px-2.5 py-1 rounded-full bg-orange-500/20 text-orange-400 font-semibold">Live Preview</span>
+                        </div>
+
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between text-slate-300">
+                                <span>Base:</span>
+                                <span class="font-bold text-white" x-text="customKoththu.base.name"></span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Protein:</span>
+                                <span class="font-bold text-white" x-text="customKoththu.protein.name"></span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Gravy:</span>
+                                <span class="font-bold text-white" x-text="customKoththu.gravy.name"></span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Spice Level:</span>
+                                <span class="font-bold text-red-400" x-text="customKoththu.spice"></span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-800 pt-4 flex items-center justify-between">
+                            <div>
+                                <div class="text-xs text-slate-400">Total Price</div>
+                                <div class="text-2xl font-black text-amber-400" x-text="`LKR ${calcCustomTotal()}`"></div>
+                            </div>
+                            <button @click="addCustomToCart()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold text-sm shadow-lg hover:opacity-90 transition">
+                                Add to Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="menu" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <span class="text-orange-500 font-bold text-sm tracking-widest uppercase">Popular Choices</span>
+                <h2 class="heading-font text-3xl sm:text-5xl font-black text-white mt-2">
+                    OUR SIGNATURE <span class="text-gradient">MENU</span>
+                </h2>
+                <p class="text-slate-400 mt-3 text-sm sm:text-base">
+                    අපගේ ජනප්‍රියම චිකන්, චීස්, සීෆුඩ් සහ ඩොල්ෆින් කොත්තු එකතුවෙන් ඔයාගේ ආසම එක තෝරාගන්න!
+                </p>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-12">
+                <template x-for="cat in menuCategories" :key="cat">
+                    <button @click="selectedCategory = cat; AudioFX.playTaka()" 
+                            :class="selectedCategory === cat ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'"
+                            class="px-5 py-2.5 rounded-full text-xs sm:text-sm font-bold transition">
+                        <span x-text="cat"></span>
+                    </button>
+                </template>
+            </div>
+
+            <!-- Menu Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <template x-for="item in filteredMenuItems()" :key="item.id">
+                    <div class="glass-card rounded-3xl overflow-hidden border border-slate-800 hover:border-orange-500/40 transition duration-300 flex flex-col justify-between group">
+                        
+                        <div>
+                            <!-- Image Header -->
+                            <div class="relative h-52 overflow-hidden">
+                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                                     onerror="this.src='https://placehold.co/600x400/1e293b/f97316?text=Best+Koththu'">
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
+                                
+                                <span class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md border border-slate-700 text-amber-400 font-semibold text-[11px] px-3 py-1 rounded-full"
+                                      x-text="item.category">
+                                </span>
+
+                                <template x-if="item.isBestseller">
+                                    <span class="absolute top-3 right-3 bg-red-600 text-white font-black text-[10px] uppercase px-2.5 py-1 rounded-lg tracking-wider">
+                                        ⭐ Popular
+                                    </span>
+                                </template>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="p-6">
+                                <h3 class="text-xl font-bold text-white group-hover:text-orange-400 transition" x-text="item.name"></h3>
+                                <p class="text-slate-400 text-xs sm:text-sm mt-2 leading-relaxed" x-text="item.desc"></p>
+                            </div>
+                        </div>
+
+                        <!-- Footer Price & Add -->
+                        <div class="px-6 pb-6 pt-2 flex items-center justify-between border-t border-slate-800/60 mt-4">
+                            <div>
+                                <span class="text-xs text-slate-500 block">Price</span>
+                                <span class="text-xl font-black text-amber-400" x-text="`LKR ${item.price}`"></span>
+                            </div>
+                            <button @click="addToCart(item)" class="px-4 py-2.5 rounded-xl bg-orange-500/20 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/40 font-bold text-xs sm:text-sm flex items-center gap-2 transition">
+                                <i class="fa-solid fa-plus"></i> Add
+                            </button>
+                        </div>
+
+                    </div>
+                </template>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="about" class="py-20 bg-slate-900/40 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                
+                <div class="glass-card p-8 rounded-3xl border border-slate-800">
+                    <div class="w-16 h-16 rounded-2xl bg-orange-500/20 text-orange-500 text-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Sizzling & Hot</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        තාච්චියෙන් කෙලින්ම ඔයාගේ අතට! කිසිම වෙලාවක පරණ කොත්තු විකුණන්නේ නෑ, 100% fresh cooked!
+                    </p>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl border border-slate-800">
+                    <div class="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-500 text-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fa-solid fa-cheese"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Real Cheese & Spices</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        නියම Mozzarella Cheese සහ අපේම අතින් හදාගත් සුවඳවත් තුනපහ රහස් ග්‍රේවි එක.
+                    </p>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl border border-slate-800">
+                    <div class="w-16 h-16 rounded-2xl bg-red-500/20 text-red-500 text-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fa-solid fa-motorcycle"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">Lightning Fast Delivery</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        විනාඩි 30න් ඔයාගේ දොරකඩටම රත් වෙන කොත්තු පාර්සලය ගෙනැත් දෙනවා.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="py-20 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="glass-card rounded-3xl p-8 sm:p-12 border border-slate-800 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <div class="space-y-6">
+                    <span class="text-orange-500 font-bold text-xs uppercase tracking-widest">Visit Us or Call</span>
+                    <h2 class="heading-font text-3xl sm:text-4xl font-black text-white">
+                        BEST KOTHTHU <br>
+                        <span class="text-gradient">LOCATION & HOURS</span>
+                    </h2>
+                    
+                    <div class="space-y-4 text-sm text-slate-300">
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800 text-orange-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-white">Location Address</div>
+                                <div>No. 142, Main Food Street, Colombo / Local Area</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800 text-amber-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-white">Opening Hours</div>
+                                <div>Everyday: 4:30 PM - 11:30 PM (Night Special)</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-slate-800 text-emerald-400 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div>
+                                <div class="font-bold text-white">Direct Hotline</div>
+                                <div>+94 77 123 4567 / +94 71 987 6543</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fast WhatsApp Order Box -->
+                <div class="bg-slate-900/90 p-6 sm:p-8 rounded-2xl border border-slate-800">
+                    <h3 class="text-xl font-bold text-white mb-2">Direct Order via WhatsApp 💬</h3>
+                    <p class="text-xs text-slate-400 mb-6">ඔයාට Cart එක නොදා කෙලින්ම WhatsApp එකෙන් order එක තියන්නත් පුළුවන්!</p>
+                    
+                    <div class="space-y-4">
+                        <input type="text" x-model="quickOrder.name" placeholder="ඔයාගේ නම (Your Name)" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-500">
+                        <input type="text" x-model="quickOrder.item" placeholder="ඕන කරන කොත්තු එක (e.g. Chicken Cheese Koththu 1)" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-500">
+                        <textarea x-model="quickOrder.address" placeholder="Delivery Address / Note" rows="2" class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-orange-500"></textarea>
+                        
+                        <button @click="sendQuickWhatsApp()" class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-900/40">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> Send Order via WhatsApp
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <div x-show="cartOpen" x-transition.opacity class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex justify-end">
+        <div @click.outside="cartOpen = false" class="w-full max-w-md bg-slate-900 h-full p-6 flex flex-col justify-between border-l border-slate-800 shadow-2xl overflow-y-auto">
+            
+            <div>
+                <!-- Cart Header -->
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+                    <h3 class="heading-font text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-basket-shopping text-orange-500"></i> Your Cart
+                    </h3>
+                    <button @click="cartOpen = false" class="text-slate-400 hover:text-white text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Cart Items List -->
+                <div x-show="cart.length === 0" class="text-center py-12 text-slate-500">
+                    <i class="fa-solid fa-dumpster-fire text-4xl mb-3 block opacity-30"></i>
+                    <p class="text-sm">Cart එක හිස්ව තියෙන්නේ. Menu එකෙන් කොත්තු එකතු කරගන්න!</p>
+                </div>
+
+                <div class="space-y-4">
+                    <template x-for="(item, index) in cart" :key="index">
+                        <div class="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-between gap-3">
+                            <div>
+                                <div class="font-bold text-sm text-white" x-text="item.name"></div>
+                                <div class="text-xs text-orange-400" x-text="`LKR ${item.price} x ${item.qty}`"></div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button @click="updateQty(index, -1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs">-</button>
+                                <span class="text-xs font-bold text-white" x-text="item.qty"></span>
+                                <button @click="updateQty(index, 1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs">+</button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Cart Footer -->
+            <div x-show="cart.length > 0" class="border-t border-slate-800 pt-6 space-y-4 mt-6">
+                <div class="flex justify-between items-center text-lg font-bold">
+                    <span class="text-slate-300">Total:</span>
+                    <span class="text-amber-400 font-black" x-text="`LKR ${cartTotal()}`"></span>
+                </div>
+
+                <button @click="checkoutCart()" class="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-orange-600/30">
+                    <i class="fa-brands fa-whatsapp text-lg"></i> Complete Order via WhatsApp
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="border-t border-slate-800 bg-slate-950 py-10 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 space-y-4">
+            <div class="heading-font text-lg font-bold text-white">BEST KOTHTHU 🇱🇰</div>
+            <p class="max-w-md mx-auto text-slate-400">
+                The Most Modern & Authentic Sizzling Koththu Experience. Taste the real Sri Lankan Street Food Fire!
+            </p>
+            <div>© 2026 Best Koththu. Built with ❤️ for Sri Lankan Street Food Lovers.</div>
+        </div>
+    </footer>
+
+    <script>
+        function koththuApp() {
+            return {
+                mobileMenuOpen: false,
+                cartOpen: false,
+                cart: [],
+                selectedCategory: 'All',
+
+                quickOrder: {
+                    name: '',
+                    item: '',
+                    address: ''
+                },
+
+                builderOptions: {
+                    bases: [
+                        { id: 'b1', name: 'Rotti Shredded', price: 300 },
+                        { id: 'b2', name: 'String Hopper Koththu', price: 350 },
+                        { id: 'b3', name: 'Dolphin Parotta', price: 400 },
+                        { id: 'b4', name: 'Palandi Special', price: 450 }
+                    ],
+                    proteins: [
+                        { id: 'p1', name: 'Spicy Chicken', price: 500 },
+                        { id: 'p2', name: 'Melted Cheese', price: 400 },
+                        { id: 'p3', name: 'Chicken + Cheese Combo', price: 800 },
+                        { id: 'p4', name: 'Egg Double', price: 250 },
+                        { id: 'p5', name: 'Seafood Mix', price: 900 },
+                        { id: 'p6', name: 'Vegetarian / Mushroom', price: 300 }
+                    ],
+                    gravies: [
+                        { id: 'g1', name: 'Chicken Gravy', price: 0 },
+                        { id: 'g2', name: 'Cheese Curry', price: 150 },
+                        { id: 'g3', name: 'Hot Fish Curry', price: 100 },
+                        { id: 'g4', name: 'Black Curry Gravy', price: 120 }
+                    ]
+                },
+
+                customKoththu: {
+                    base: { id: 'b1', name: 'Rotti Shredded', price: 300 },
+                    protein: { id: 'p1', name: 'Spicy Chicken', price: 500 },
+                    gravy: { id: 'g1', name: 'Chicken Gravy', price: 0 },
+                    spice: 'Medium 🌶️🌶️'
+                },
+
+                menuCategories: ['All', 'Chicken', 'Cheese Special', 'Dolphin', 'Seafood', 'Veg & Egg'],
+
+                menuItems: [
+                    {
+                        id: 'm1',
+                        name: 'Signature Roast Chicken Koththu',
+                        category: 'Chicken',
+                        price: 1200,
+                        isBestseller: true,
+                        desc: 'උණු උණු රොටී, රෝස්ට් චිකන්, නැවුම් එළවළු සහ අපේම ස්පෙෂල් ග්‍රේවි එක සමඟ.',
+                        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80'
+                    },
+                    {
+                        id: 'm2',
+                        name: 'Full Cheese Lava Chicken Koththu',
+                        category: 'Cheese Special',
+                        price: 1600,
+                        isBestseller: true,
+                        desc: 'චීස් ලෝලීන්ටම විශේෂිතයි! චිකන් කොත්තු එක උඩට රත් වූ මොසරැල්ලා චීස් ලාවා පාරක්!',
+                        image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80'
+                    },
+                    {
+                        id: 'm3',
+                        name: 'Roast Chicken Cheese Dolphin Koththu',
+                        category: 'Dolphin',
+                        price: 1700,
+                        isBestseller: font = true,
+                        desc: 'ඝනකම් පරොට්ටා කියුබ්, චිකන්, චීස් සහ ක්‍රීමි කරි එකතු කර සාදන ලද Dolphin Style Koththu.',
+                        image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80'
+                    },
+                    {
+                        id: 'm4',
+                        name: 'Seafood Sizzler Koththu',
+                        category: 'Seafood',
+                        price: 1800,
+                        isBestseller: false,
+                        desc: 'දැල්ලෝ, ඉස්සෝ සහ මාළු මිශ්‍රිත සැරට හැදූ සුපිරිම Seafood Koththu එක.',
+                        image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80'
+                    },
+                    {
+                        id: 'm5',
+                        name: 'Classic Double Egg Koththu',
+                        category: 'Veg & Egg',
+                        price: 850,
+                        isBestseller: false,
+                        desc: 'නියම බිත්තර දෙකක පදම, එළවළු සහ ස්පයිසි ග්‍රේවි සමඟ සම්ප්‍රදායික කොත්තු රසය.',
+                        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=600&q=80'
+                    },
+                    {
+                        id: 'm6',
+                        name: 'Mushroom & Cheese Veg Koththu',
+                        category: 'Veg & Egg',
+                        price: 950,
+                        isBestseller: false,
+                        desc: 'මෂ්රූම්, එළවළු සහ චීස් මිශ්‍ර කර සාදන ලද රසවත් නිර්මාංශ කොත්තු එක.',
+                        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80'
+                    }
+                ],
+
+                initApp() {
+                    console.log('Best Koththu App Initialized');
+                },
+
+                filteredMenuItems() {
+                    if (this.selectedCategory === 'All') return this.menuItems;
+                    return this.menuItems.filter(item => item.category === this.selectedCategory);
+                },
+
+                calcCustomTotal() {
+                    return this.customKoththu.base.price + 
+                           this.customKoththu.protein.price + 
+                           this.customKoththu.gravy.price;
+                },
+
+                addCustomToCart() {
+                    const customName = `Custom Koththu (${this.customKoththu.base.name} + ${this.customKoththu.protein.name})`;
+                    const price = this.calcCustomTotal();
+                    this.addToCart({
+                        id: 'custom-' + Date.now(),
+                        name: customName,
+                        price: price
+                    });
+                    confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
+                },
+
+                addToCart(item) {
+                    AudioFX.playSizzle();
+                    const existing = this.cart.find(c => c.id === item.id);
+                    if (existing) {
+                        existing.qty++;
+                    } else {
+                        this.cart.push({
+                            id: item.id,
+                            name: item.name,
+                            price: item.price,
+                            qty: 1
+                        });
+                    }
+                },
+
+                updateQty(index, change) {
+                    this.cart[index].qty += change;
+                    if (this.cart[index].qty <= 0) {
+                        this.cart.splice(index, 1);
+                    }
+                },
+
+                cartTotal() {
+                    return this.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                },
+
+                checkoutCart() {
+                    if (this.cart.length === 0) return;
+                    let text = `*New Order - Best Koththu Website*%0A%0A`;
+                    this.cart.forEach(item => {
+                        text += `• ${item.name} x ${item.qty} = LKR ${item.price * item.qty}%0A`;
+                    });
+                    text += `%0A*Total Amount: LKR ${this.cartTotal()}*`;
+                    
+                    window.open(`https://wa.me/94771234567?text=${text}`, '_blank');
+                },
+
+                sendQuickWhatsApp() {
+                    if (!this.quickOrder.item) {
+                        alert('කරුණාකර ඕන කරන කොත්තු එක ඇතුලත් කරන්න!');
+                        return;
+                    }
+                    let text = `*Quick Order - Best Koththu*%0A`;
+                    text += `Name: ${this.quickOrder.name || 'Customer'}%0A`;
+                    text += `Order: ${this.quickOrder.item}%0A`;
+                    text += `Address: ${this.quickOrder.address || 'N/A'}`;
+
+                    window.open(`https://wa.me/94771234567?text=${encodeURIComponent(text)}`, '_blank');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
